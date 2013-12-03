@@ -64,8 +64,8 @@ let in_bounds (x, y) =
 
 let pi = acos (-1.)
 
-let deg_to_rad x = (180. *. x) /. pi
-let rad_to_deg x = (pi *. x) /. 180.
+let rad_to_deg x = (180. *. x) /. pi
+let deg_to_rad x = (pi *. x) /. 180.
 
 (* add_v v1 v2 returns the vector sum v1 + v2 *)
 let add_v (x1, y1) (x2, y2) = (x1 +. x2, y1 +. y2)
