@@ -4,24 +4,28 @@ open Definitions
 open Constants
 open Util
 
+(* updates player hit by enemy bullet *)
 let victim (team : team_data) : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (lives - 1,cINITIAL_BOMBS,score,power/2,charge,player)
   | _ -> failwith "bad team_data in handle_focus"
 
+(* updates player who hit enemy with bullet *)
 let shooter (team : team_data) : team_data = 
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (lives,bomb,score+cKILL_POINTS,power,charge,player)
   | _ -> failwith "bad team_data in handle_focus"
 
+(* updates player's list of movements *)
 let handle_move (game : game) (col : color) (dir_lst : direction list) : game =
   if col = Red then
     { game with red_moves = dir_lst }
   else
     { game with blue_moves = dir_lst }
 
+(* returns position of player *)
 let get_p_pos game col =
   match game with
     | (red,blue,_,_,_) ->
@@ -35,12 +39,15 @@ let get_p_pos game col =
         | _ -> failwith "bad team_data in handle_shoot" )
     | _ -> failwith "bad game in handle_shoot"
 
+(* returns velocity *)
 let get_vel origin target speed : velocity =
   scale speed (unit_v (subt_v target origin))
 
+(* returns capped acceleration *)
 let get_acc acc : acceleration =
   if (magnitude acc) >= cACCEL_LIMIT then (0.,0.) else acc
 
+(* decreases charge of player *)
 let dec_charge team amt : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
@@ -48,12 +55,14 @@ let dec_charge team amt : team_data =
     (lives,bomb,score,power,charge',player)
   | _ -> failwith "bad team_data in dec_charge"
 
+(* checks if player has enough charge to shoot *)
 let can_shoot team b_type : bool =
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (charge-(cost_of_bullet b_type)) >= 0
   | _ -> failwith "bad team_data in can_shoot"
 
+(* updates list of active bullets *)
 let handle_shoot game col b_type target b_acc =
   let p_pos = get_p_pos game col in
   let data' = match b_type with
@@ -83,6 +92,7 @@ let handle_shoot game col b_type target b_acc =
     | _ -> failwith "bad bullet type in handle_shoot" in
   { game with data = data' }
 
+(* updates player's focus state *)
 let handle_focus game col f_bool =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
@@ -95,6 +105,7 @@ let handle_focus game col f_bool =
     | failwith "bad game_data in handle_focus" in
   { game with data = data' }
 
+(* updates game when a player has used a bomb *)
 let handle_bomb game col =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
@@ -105,6 +116,7 @@ let handle_bomb game col =
   else
     { game with data = data'; blue_inv = cBOMB_DURATION; blue_bomb = true }
 
+(* returns state of game *)
 let check_result (data: game_data) (duration: float) : result =
   failwith "Picasso was the man"
 end
