@@ -9,7 +9,8 @@ let decrement_lives (team : team_data) : team_data =
   | (lives,bombs,score,power,charge,player) ->
     (lives-1,cINITIAL_BOMBS,score,power,charge,player)
 
-let victim (team : team_data) : team_data=
+let victim (team : team_data) : team_data =
+  (* remove life *)
 
 let shooter (team : team_data) : team_data = 
 
@@ -30,6 +31,15 @@ let handle_focus game col f_bool =
   game with data = data'
 
 let handle_bomb game col =
+  let data' = match game.data with
+    | (red,blue,npcs,bullets,power) ->
+      (red,blue,npcs,[],power)
+    | failwith "bad game_data in handle_bomb" in
+  if col = Red then
+    { game with data = data'; red_inv = cBOMB_DURATION; red_bomb = true }
+  else
+    { game with data = data'; blue_inv = cBOMB_DURATION; blue_bomb = true }
+  
 
 let check_result (data: game_data) (duration: float) : result =
   failwith "Picasso was the man"

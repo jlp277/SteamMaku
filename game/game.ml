@@ -8,8 +8,6 @@ type game = {
   data : game_data;
   red_moves : direction list;
   blue_moves : direction list;
-  (* red_foc : bool;
-  blue_foc : bool; *)
   red_inv : int;
   blue_inv : int;
   red_bomb : bool;
@@ -27,8 +25,6 @@ let handle_time game =
     match game.data with
     | (red,blue,npcs,bullets,powerups) ->
       let bullets' = Bullet.update bullets in
-      (* let red' = Team.update_foc game.red_foc red in
-      let blue' = Team.update_foc game.blue_foc blue in *)
       let red' = Team.update_pos game.red_moves red' in
       let blue' = Team.update_pos game.blue_moves blue' in
       let red' = Team.add_charge red' in
@@ -84,8 +80,15 @@ let handle_time game =
     blue_moves = blue_moves';
     red_inv = !red_inv - 1;
     blue_inv = !blue_inv - 1;
-    (* red_bomb = if red_inv ;
-    blue_bomb =   *)} in
+    red_bomb = 
+      if !red_inv - 1 <= 0 then false 
+      else if (game.red_bomb) then true
+      else (*we are mercy invincible*) false;
+    blue_bomb = 
+      if !blue_inv - 1 <= 0 then false
+      else if (game.blue_bomb) then true
+      else false
+     } in
   (* check victory conditions *)
   result = GameState.check_result game' duration' in
   (game',result)
