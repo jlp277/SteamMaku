@@ -40,8 +40,8 @@ let get_p_pos game col =
     | _ -> failwith "bad game in handle_shoot"
 
 (* returns velocity *)
-let get_vel origin target speed : velocity =
-  scale speed (unit_v (subt_v target origin))
+let get_vel vector speed : velocity =
+  scale speed (unit_v vector)
 
 (* returns capped acceleration *)
 let get_acc acc : acceleration =
@@ -62,6 +62,12 @@ let can_shoot team b_type : bool =
     (charge-(cost_of_bullet b_type)) >= 0
   | _ -> failwith "bad team_data in can_shoot"
 
+let rec build_targets acc orig_v i =
+  if i = cSPREAD_NUM then acc
+  else
+    let new_v = rotate orig_v ((360/cSPREAD_NUM)*i) in
+    build_targets (new_v::acc) orig_v i+1 in
+
 (* updates list of active bullets *)
 let handle_shoot game col b_type target b_acc =
   let p_pos = get_p_pos game col in
@@ -71,7 +77,7 @@ let handle_shoot game col b_type target b_acc =
         b_type = Bubble;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = get_vel p_pos target (speed_of_bullet Bubble);
+        b_vel = get_vel (subt_v target p_pos) (speed_of_bullet Bubble);
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Bubble;
         b_color = col } in
@@ -87,7 +93,30 @@ let handle_shoot game col b_type target b_acc =
             (red,blue,npcs,bullets,powerups)
         | _ -> failwith "bad game_data in bubble" in
       { game with data = data' }
-    | Spread -> (* todo *)
+    | Spread ->
+      let spread target' : bullet = {
+        b_type = Spread;  
+        b_id = next_available_id();
+        b_pos = p_pos;
+        b_vel = get_vel target' (speed_of_bullet Bubble);
+        b_accel = get_acc b_acc;
+        b_radius = radius_of_bullet Spread;
+        b_color = col } in
+      let targets = build_targets [] (subt_v target p_pos) 0 in
+      let spread_lst =
+        List.fold_left (fun a target' -> (spread target')::a) [] targets in
+      let data' = match game.data with
+        | (red,blue,npcs,bullets,powerups) ->
+          if col = Red & (can_shoot red Bubble) then
+            let red' = dec_charge red (cost_of_bullet Spread) in
+            (red',blue,npcs,(spread_lst@bullets),powerups)
+          else if col = Blue & (can_shoot blue Bubble) then
+            let blue' = dec_charge blue (cost_of_bullet Spread) in
+            (red,blue',npcs,(spread_lst@bullets),powerups)
+          else
+            (red,blue,npcs,bullets,powerups)
+        | _ -> failwith "bad game_data in bubble" in 
+      { game with data = data' }
     | Trail -> (* todo *)
     | _ -> failwith "bad bullet type in handle_shoot" in
   { game with data = data' }
