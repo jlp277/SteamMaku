@@ -55,10 +55,10 @@ let handle_time game =
         | [] -> (red',blue',bullets')
         | gra::t ->
           (* check for bomb invincibility *)
-          if (gra.p_color = Red) then
+          if (gra.p_color = Red) & not(game.red_bomb) then
             let red' = GameState.grazed red' in
             handle_grazs red' blue' bullets' t
-          else if (hit.p_color = Blue) then
+          else if (hit.p_color = Blue) & not(game.blue_bomb) then
             let blue' = GameState.grazed blue' in
             handle_grazs red' blue' bullets' t in
           else
@@ -66,9 +66,9 @@ let handle_time game =
             let blue' = blue' in
             let bullets' = bullets' in
             handle_grazs red' blue' bullets' t in
-      let (collisions,grazes) = Bullet.check_collisions (red',blue',npcs,bullets',powerups) in
+      let (collisions,grazes) = Bullet.check_contacts (red',blue',npcs,bullets',powerups) in
       let (red',blue',bullets') = handle_colls red' blue' bullets' collisions in
-      let (red',blue',bullets') = handle_grazs red' blue' bullets' collisions in
+      let (red',blue',bullets') = handle_grazs red' blue' bullets' grazes in
       (red',blue',npcs,bullets',powerups)
     | _ -> failwith "bad game.data" in
   let red_moves' = match game.red_moves with | h::t -> t | _ -> [] in
@@ -83,7 +83,7 @@ let handle_time game =
     red_bomb = 
       if !red_inv - 1 <= 0 then false 
       else if (game.red_bomb) then true
-      else (*we are mercy invincible*) false;
+      else (* we are mercy invincible *) false;
     blue_bomb = 
       if !blue_inv - 1 <= 0 then false
       else if (game.blue_bomb) then true
