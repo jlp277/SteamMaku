@@ -1,7 +1,7 @@
 open Definitions
 open Constants
 open Util
-open GameState
+(* open GameState *)
 
 type game = {
   duration : float;
@@ -15,10 +15,10 @@ type game = {
 }
 
 let init_game () : game =
-  let rx = 1./8. *. float_of_int cBOARD_WIDTH in
-  let ry = (float_of_int cBOARDHEIGHT) /. 2. in
-  let bx = 7./8. *. float_of_int cBOARD_WIDTH in
-  let by = (float_of_int cBOARDHEIGHT) /. 2. in
+  let rx = 1./.8. *. float_of_int cBOARD_WIDTH in
+  let ry = (float_of_int cBOARD_HEIGHT) /. 2. in
+  let bx = 7./.8. *. float_of_int cBOARD_WIDTH in
+  let by = (float_of_int cBOARD_HEIGHT) /. 2. in
   let p_red : player_char = {
     p_id = next_available_id ();
     p_pos = (rx, ry);
@@ -34,12 +34,12 @@ let init_game () : game =
     p_color = Blue
   } in
   (*lives,bombs,score,power,charge,p_red*)
-  let red = (cINITIAL_LIVES, cINITIAL_BOMBS, 0, 0, p_red) in
-  let blue = (cINITIAL_LIVES, cINITIAL_BOMBS, 0, 0, p_blue) in
-  let n_data = (red, blue, [], [], []) in
+  let red = (cINITIAL_LIVES,cINITIAL_BOMBS,0,0,0,p_red) in
+  let blue = (cINITIAL_LIVES,cINITIAL_BOMBS,0,0,0,p_blue) in
+  let n_data = (red,blue,[],[],[]) in
   let new_game = {
     duration = cTIME_LIMIT;
-    data = n_data;
+    data = (n_data : game_data);
     red_moves = [];
     blue_moves = [];
     red_inv = 0;
@@ -139,7 +139,7 @@ let handle_time game =
       else false
      } in
   (* check victory conditions *)
-  result = GameState.check_result game' duration' in
+  let result = GameState.check_result game' duration' in
   (game',result)
 
 let handle_action game col act =

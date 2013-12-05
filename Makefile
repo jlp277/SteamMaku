@@ -12,10 +12,10 @@ all: team/babybot.exe game/game.exe
 # However, you should run "make clean" before you submit; submitting compiled
 # files is bad form.
 clean:
-	rm -f $(shell find -name "*.cmo")
-	rm -f $(shell find -name "*.cmi")
-	rm -f $(shell find -name "*.cma")
-	rm -f $(shell find -name "*.exe")
+	rm -f $(shell find . -name "*.cmo")
+	rm -f $(shell find . -name "*.cmi")
+	rm -f $(shell find . -name "*.cma")
+	rm -f $(shell find . -iname "*.exe")
 	rm -f .depend
 
 

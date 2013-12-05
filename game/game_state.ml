@@ -136,7 +136,7 @@ let handle_shoot game col b_type target b_acc =
           else
             let new_trail_bullet = trail target' cTRAIL_SPEED_STEP*i in
             create_trail_bullets (new_trail_bullet::acc) i+1 in
-        create_trail_bullets acc 1
+        create_trail_bullets acc 1 in
       let trail_list = List.fold_left create_trail [] targets in
       (match game.data with
         | (red,blue,npcs,bullets,powerups) ->
@@ -157,12 +157,12 @@ let handle_focus game col f_bool =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
       let team = if col = Red then red else blue in
-      let team' = (
-        match team with
+      (match team with
         | (lives,bomb,score,power,charge,player) ->
-          (lives,bomb,score,power,charge,(player with p_focused = f_bool))
+          let player' = { player with p_focused = f_bool } in
+          (lives,bomb,score,power,charge,player')
         | _ -> failwith "bad team_data in handle_focus" )
-    | failwith "bad game_data in handle_focus" in
+    | _ -> failwith "bad game_data in handle_focus" in
   { game with data = data' }
 
 (* updates game when a player has used a bomb *)
@@ -170,7 +170,7 @@ let handle_bomb game col =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
       (red,blue,npcs,[],power)
-    | failwith "bad game_data in handle_bomb" in
+    | _ -> failwith "bad game_data in handle_bomb" in
   if col = Red then
     { game with data = data'; red_inv = cBOMB_DURATION; red_bomb = true }
   else
