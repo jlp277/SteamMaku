@@ -15,7 +15,40 @@ type game = {
 }
 
 let init_game () : game =
-  failwith "U.N. Owen wasn't her"
+  let rx = 1./8. *. float_of_int cBOARD_WIDTH in
+  let ry = (float_of_int cBOARDHEIGHT) /. 2. in
+  let bx = 7./8. *. float_of_int cBOARD_WIDTH in
+  let by = (float_of_int cBOARDHEIGHT) /. 2. in
+  let p_red : player_char = {
+    p_id = next_available_id ();
+    p_pos = (rx, ry);
+    p_focused = false ;
+    p_radius = cHITBOX_RADIUS;
+    p_color = Red
+  } in
+  let p_blue : player_char = {
+    p_id = next_available_id ();
+    p_pos = (bx, by);
+    p_focused = false;
+    p_radius = cHITBOX_RADIUS;
+    p_color = Blue
+  } in
+  (*lives,bombs,score,power,charge,p_red*)
+  let red = (cINITIAL_LIVES, cINITIAL_BOMBS, 0, 0, p_red) in
+  let blue = (cINITIAL_LIVES, cINITIAL_BOMBS, 0, 0, p_blue) in
+  let n_data = (red, blue, [], [], []) in
+  let new_game = {
+    duration = cTIME_LIMIT;
+    data = n_data;
+    red_moves = [];
+    blue_moves = [];
+    red_inv = 0;
+    blue_inv = 0;
+    red_bomb = false;
+    blue_bomb = false
+  } in
+  new_game
+
 
 let handle_time game =
   let duration' = game.duration +. cUPDATE_TIME in
