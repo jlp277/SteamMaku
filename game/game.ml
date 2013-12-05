@@ -1,7 +1,9 @@
 open Definitions
 open Constants
 open Util
-(* open GameState *)
+include Bullet
+include Team
+include Gamestate
 
 type game = {
   duration : float;
@@ -13,6 +15,7 @@ type game = {
   red_bomb : bool;
   blue_bomb : bool;
 }
+
 
 let init_game () : game =
   let rx = 1./.8. *. float_of_int cBOARD_WIDTH in
@@ -68,8 +71,8 @@ let handle_time game =
         | (hit, bull)::t ->
           if (hit.p_color = Red) then
             if game.red_inv <= 0 then
-              let red' = GameState.victim red' in
-              let blue' = GameState.shooter blue' in
+              let red' = Gamestate.victim red' in
+              let blue' = Gamestate.shooter blue' in
               let bullets' = [] in
               let _ = red_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullets' t
@@ -78,8 +81,8 @@ let handle_time game =
               handle_colls red' blue' bullets' t
           else if (hit.p_color = Blue) then
             if game.blue_inv <= 0 then
-              let blue' = GameState.victim blue' in
-              let red' = GameState.shooter red' in
+              let blue' = Gamestate.victim blue' in
+              let red' = Gamestate.shooter red' in
               let bullets' = [] in
               let _ = blue_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullets' t
@@ -98,14 +101,14 @@ let handle_time game =
           (* check for bomb invincibility *)
           if (gra.p_color = Red) then
             if not game.red_bomb then
-              let red' = GameState.grazed red' in
+              let red' = Gamestate.grazed red' in
               handle_grazs red' blue' bullets' t
             else
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else if (hit.p_color = Blue) then
             if not game.blue_bomb then
-              let blue' = GameState.grazed blue' in
+              let blue' = Gamestate.grazed blue' in
               handle_grazs red' blue' bullets' t
             else
               let bullets' = Bullet.remove_bullet bull bullets' in
@@ -139,15 +142,15 @@ let handle_time game =
       else false
      } in
   (* check victory conditions *)
-  let result = GameState.check_result game' duration' in
+  let result = Gamestate.check_result game' duration' in
   (game',result)
 
 let handle_action game col act =
   match act with
-  | Move (dir_lst) -> GameState.handle_move game col dir_list
-  | Shoot (b_type,b_pos,b_acc) -> GameState.handle_shoot game col b_type target b_acc 
-  | Focus (f_bool) -> GameState.handle_focus game col f_bool
-  | Bomb -> GameState.handle_bomb game col
+  | Move (dir_lst) -> Gamestate.handle_move game col dir_list
+  | Shoot (b_type,b_pos,b_acc) -> Gamestate.handle_shoot game col b_type target b_acc 
+  | Focus (f_bool) -> Gamestate.handle_focus game col f_bool
+  | Bomb -> Gamestate.handle_bomb game col
 
 let get_data game = game.data
 

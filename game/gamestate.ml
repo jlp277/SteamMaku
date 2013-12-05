@@ -1,8 +1,9 @@
-module GameState = struct
+module Gamestate = struct
 
 open Definitions
 open Constants
 open Util
+include Game
 
 (* updates player hit by enemy bullet *)
 let victim (team : team_data) : team_data =
