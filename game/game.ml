@@ -5,16 +5,7 @@ include Bullet
 include Team
 include Gamestate
 
-type game = {
-  duration : float;
-  data : game_data;
-  red_moves : direction list;
-  blue_moves : direction list;
-  red_inv : int;
-  blue_inv : int;
-  red_bomb : bool;
-  blue_bomb : bool;
-}
+type game = Gamestate.game
 
 let set_rmoves (g:game) (mv_lst:direction list) : game =
   {g with red_moves = mv_lst}
