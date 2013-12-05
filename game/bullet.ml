@@ -98,20 +98,30 @@ let rec check_help (p1 : player_char * bool) (p2 : player_char * bool)
   end
 
 
-(*checks to see if the bullet b has collided with the player p*)
+(*checks to see if the bullet b has collided with the player p
+ *returns false if the bullet and the player are the same color
+ *)
 let check_collision (b : bullet) (p : player_char) : bool =
-  let dist = distance b.b_pos p.p_pos in
-  let min_dist = b.b_radius + p.p_radius in
-  if dist < min_dist then true
-  else false
+  if b.b_color = p.p_color then
+    false
+  else
+    let dist = distance b.b_pos p.p_pos in
+    let min_dist = b.b_radius + p.p_radius in
+    if dist < min_dist then true
+    else false
 
-(*checks to see if the bullet b has grazed the player (but not collided) p*)
+(*checks to see if the bullet b has grazed the player (but not collided) p
+ *returns false if the bullet and the player are the same color
+ *)
 let check_graze (b : bullet) (p : player_char) : bool =
-  let dist = distance b.b_pos p.p_pos in
-  let coll_dist = b.b_radius + p.p_radius in
-  let min_dist = cGRAZE_RADIUS in
-  if coll_dist <= dist & dist < min_dist then true
-  else false
+  if b.b_color = p.p_color then
+    false
+  else
+    let dist = distance b.b_pos p.p_pos in
+    let coll_dist = b.b_radius + p.p_radius in
+    let min_dist = cGRAZE_RADIUS in
+    if coll_dist <= dist & dist < min_dist then true
+    else false
 
 (* update bullet position and velocity *)
 let rec update (bullets : bullet list) : bullet list =
