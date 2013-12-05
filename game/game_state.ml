@@ -183,31 +183,18 @@ let check_score r_score b_score : result =
 
 (* returns state of game *)
 let check_result (data: game_data) (duration: float) : result =
-  let (r_score,b_score) =
+  let ((r_score,r_lives),(b_score,b_lives)) =
     match data with
     | (red,blue,npcs,bullets,power) ->
-      let r_score = (
+      let r_stats = (
         match red with
-        | (_,_,score,_,_,_) -> score
+        | (lives,_,score,_,_,_) -> (lives,score)
         | _ -> failwith "bad team_data in check_result") in
-      let b_score = (
+      let b_stats = (
         match blue with
-        | (_,_,score,_,_,_) -> score
+        | (lives,_,score,_,_,_) -> (lives,score)
         | _ -> failwith "bad team_data in check_result") in
-      (r_score,b_score)
-    | _ -> failwith "bad game_data in check_result" in
-  let (r_lives,b_lives) = 
-    match data with
-    | (red,blue,npcs,bullets,power) ->
-      let r_lives = (
-        match red with
-        | (lives,_,_,_,_,_) -> lives
-        | _ -> failwith "bad team_data in check_result") in
-      let b_lives = (
-        match blue with
-        | (lives,_,_,_,_,_) -> lives
-        | _ -> failwith "bad team_data in check_result") in
-      (r_lives,b_lives)
+      (r_stats,b_stats)
     | _ -> failwith "bad game_data in check_result" in
   match (r_lives,b_lives,duration,r_score,b_score) with
   | (0,0,0,r_score,b_score) -> check_score r_score b_score
