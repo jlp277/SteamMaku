@@ -124,4 +124,16 @@ let rec update (bullets : bullet list) : bullet list =
     let pos' = add_v (px, py) (vx, vy) in
     let vel' = add_v (vx, vy) (ax, ay) in
     {h with b_pos = pos'; b_vel = vel'} :: update t
+
+(*remove the bullet b from the bullit list lst*)
+let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
+  match lst with
+  | [] -> []
+  | h::t ->
+    if h.b_id = b.b_id then
+      t
+    else
+      h::(remove_bullet b t)
+
+
 end

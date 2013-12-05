@@ -32,19 +32,27 @@ let handle_time game =
       let rec handle_colls red' blue' bullets' lst =
         match lst with
         | [] -> (red',blue',bullets')
-        | hit::t ->
-          if (hit.p_color = Red) & (game.red_inv <= 0) then
-            let red' = GameState.victim red' in
-            let blue' = GameState.shooter blue' in
-            let bullets' = [] in
-            let _ = red_inv := cINVINCIBLE_FRAMES in
-            handle_colls red' blue' bullets' t
-          else if (hit.p_color = Blue) & (game.blue_inv <= 0) then
-            let blue' = GameState.victim blue' in
-            let red' = GameState.shooter red' in
-            let bullets' = [] in
-            let _ = blue_inv := cINVINCIBLE_FRAMES in
-            handle_colls red' blue' bullets' t in
+        | (hit, bull)::t ->
+          if (hit.p_color = Red) then
+            if game.red_inv <= 0 then
+              let red' = GameState.victim red' in
+              let blue' = GameState.shooter blue' in
+              let bullets' = [] in
+              let _ = red_inv := cINVINCIBLE_FRAMES in
+              handle_colls red' blue' bullets' t
+            else (*red is invincible delete bullet*)
+              let bullets' = Bullet.remove_bullet bull bullets' in
+              handle_colls red' blue' bullets' t
+          else if (hit.p_color = Blue) then
+            if game.blue_inv <= 0 then
+              let blue' = GameState.victim blue' in
+              let red' = GameState.shooter red' in
+              let bullets' = [] in
+              let _ = blue_inv := cINVINCIBLE_FRAMES in
+              handle_colls red' blue' bullets' t
+            else (*blue is invincible delete bullet*)
+              let bullets' = Bullet.remove_bullet bull bullets' in
+              handle_colls red' blue' bullets' t
           else
             let red' = red' in
             let blue' = blue' in
@@ -53,14 +61,22 @@ let handle_time game =
       let rec handle_grazs red' blue' bullets' lst =
         match lst with
         | [] -> (red',blue',bullets')
-        | gra::t ->
+        | (gra, bull)::t ->
           (* check for bomb invincibility *)
-          if (gra.p_color = Red) & not(game.red_bomb) then
-            let red' = GameState.grazed red' in
-            handle_grazs red' blue' bullets' t
-          else if (hit.p_color = Blue) & not(game.blue_bomb) then
-            let blue' = GameState.grazed blue' in
-            handle_grazs red' blue' bullets' t in
+          if (gra.p_color = Red) then
+            if not game.red_bomb then
+              let red' = GameState.grazed red' in
+              handle_grazs red' blue' bullets' t
+            else
+              let bullets' = Bullet.remove_bullet bull bullets' in
+              handle_grazs red' blue' bullets' t
+          else if (hit.p_color = Blue) then
+            if not game.blue_bomb then
+              let blue' = GameState.grazed blue' in
+              handle_grazs red' blue' bullets' t
+            else
+              let bullets' = Bullet.remove_bullet bull bullets' in
+              handle grazs red' blue' bullets' t
           else
             let red' = red' in
             let blue' = blue' in
