@@ -176,7 +176,46 @@ let handle_bomb game col =
   else
     { game with data = data'; blue_inv = cBOMB_DURATION; blue_bomb = true }
 
+let check_score r_score b_score : result =
+  if r_score > b_score then Winner(Red)
+  else if b_score > r_score then Winner(Blue)
+  else Tie
+
 (* returns state of game *)
 let check_result (data: game_data) (duration: float) : result =
-  failwith "Picasso was the man"
+  let (r_score,b_score) =
+    match data with
+    | (red,blue,npcs,bullets,power) ->
+      let r_score = (
+        match red with
+        | (_,_,score,_,_,_) -> score
+        | _ -> failwith "bad team_data in check_result") in
+      let b_score = (
+        match blue with
+        | (_,_,score,_,_,_) -> score
+        | _ -> failwith "bad team_data in check_result") in
+      (r_score,b_score)
+    | _ -> failwith "bad game_data in check_result" in
+  let (r_lives,b_lives) = 
+    match data with
+    | (red,blue,npcs,bullets,power) ->
+      let r_lives = (
+        match red with
+        | (lives,_,_,_,_,_) -> lives
+        | _ -> failwith "bad team_data in check_result") in
+      let b_lives = (
+        match blue with
+        | (lives,_,_,_,_,_) -> lives
+        | _ -> failwith "bad team_data in check_result") in
+      (r_lives,b_lives)
+    | _ -> failwith "bad game_data in check_result" in
+  match (r_lives,b_lives,duration,r_score,b_score) with
+  | (0,0,0,r_score,b_score) -> check_score r_score b_score
+  | (0,0,duration,r_score,b_score) -> check_score r_score b_score
+  | (0,b_lives,0,r_score,b_score) -> Winner(Blue)
+  | (r_lives,0,0,r_score,b_score) -> Winner(Red)
+  | (r_lives,b_lives,0,r_score,b_score) -> check_score r_score b_score
+  | (r_lives,0,duration,r_score,b_score) -> Winner(Red)
+  | (0,b_lives,duration,r_score,b_score) -> Winner(Blue)
+  | (r_lives,b_lives,duration,r_score,b_score) -> Unfinished
 end
