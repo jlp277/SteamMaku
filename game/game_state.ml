@@ -62,11 +62,16 @@ let can_shoot team b_type : bool =
     (charge-(cost_of_bullet b_type)) >= 0
   | _ -> failwith "bad team_data in can_shoot"
 
-let rec build_targets acc orig_v i =
-  if i = cSPREAD_NUM then acc
+let rec build_targets_spread acc orig_v i =
+  if i = cSPREAD_NUM+1 then acc
   else
-    let new_v = rotate orig_v ((360/cSPREAD_NUM)*i) in
-    build_targets (new_v::acc) orig_v i+1 in
+    let new_v = rotate_deg orig_v ((360/cSPREAD_NUM)*i) in
+    build_targets (new_v::acc) orig_v i+1
+
+let rec build_targets_trail orig_v =
+  (rotate_deg orig_v cTRAIL_ANGLE)::
+  (rotate_deg orig_v 360-cTRAIL_ANGLE)::
+  (orig_v)::[]
 
 (* updates list of active bullets *)
 let handle_shoot game col b_type target b_acc =
@@ -81,7 +86,7 @@ let handle_shoot game col b_type target b_acc =
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Bubble;
         b_color = col } in
-      let data' = match game.data with
+      (match game.data with
         | (red,blue,npcs,bullets,powerups) ->
           if col = Red & (can_shoot red Bubble) then
             let red' = dec_charge red (cost_of_bullet Bubble) in
@@ -91,8 +96,7 @@ let handle_shoot game col b_type target b_acc =
             (red,blue',npcs,(bubble::bullets),powerups)
           else
             (red,blue,npcs,bullets,powerups)
-        | _ -> failwith "bad game_data in bubble" in
-      { game with data = data' }
+        | _ -> failwith "bad game_data in bubble")
     | Spread ->
       let spread target' : bullet = {
         b_type = Spread;  
@@ -102,22 +106,49 @@ let handle_shoot game col b_type target b_acc =
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Spread;
         b_color = col } in
-      let targets = build_targets [] (subt_v target p_pos) 0 in
-      let spread_lst =
+      let targets = build_targets_spread [] (subt_v target p_pos) 0 in
+      let spread_list =
         List.fold_left (fun a target' -> (spread target')::a) [] targets in
-      let data' = match game.data with
+      (match game.data with
         | (red,blue,npcs,bullets,powerups) ->
-          if col = Red & (can_shoot red Bubble) then
+          if col = Red & (can_shoot red Spread) then
             let red' = dec_charge red (cost_of_bullet Spread) in
-            (red',blue,npcs,(spread_lst@bullets),powerups)
-          else if col = Blue & (can_shoot blue Bubble) then
+            (red',blue,npcs,(spread_list@bullets),powerups)
+          else if col = Blue & (can_shoot blue Spread) then
             let blue' = dec_charge blue (cost_of_bullet Spread) in
-            (red,blue',npcs,(spread_lst@bullets),powerups)
+            (red,blue',npcs,(spread_list@bullets),powerups)
           else
             (red,blue,npcs,bullets,powerups)
-        | _ -> failwith "bad game_data in bubble" in 
-      { game with data = data' }
-    | Trail -> (* todo *)
+        | _ -> failwith "bad game_data in bubble")
+    | Trail ->
+      let trail target' step : bullet = {
+        b_type = Trail;  
+        b_id = next_available_id();
+        b_pos = p_pos;
+        b_vel = get_vel target' ((speed_of_bullet Trail)*step);
+        b_accel = get_acc b_acc;
+        b_radius = radius_of_bullet Trail;
+        b_color = col } in
+      let targets = build_targets_trail (subt_v target p_pos) in
+      let create_trail acc target' =
+        let rec create_trail_bullets acc i =
+          if i = cTRAIL_NUM+1 then acc
+          else
+            let new_trail_bullet = trail target' cTRAIL_SPEED_STEP*i in
+            create_trail_bullets (new_trail_bullet::acc) i+1 in
+        create_trail_bullets acc 1
+      let trail_list = List.fold_left create_trail [] targets in
+      (match game.data with
+        | (red,blue,npcs,bullets,powerups) ->
+          if col = Red & (can_shoot red Trail) then
+            let red' = dec_charge red (cost_of_bullet Trail) in
+            (red',blue,npcs,(trail_list@bullets),powerups)
+          else if col = Blue & (can_shoot blue Trail) then
+            let blue' = dec_charge blue (cost_of_bullet Trail) in
+            (red,blue',npcs,(trail_list@bullets),powerups)
+          else
+            (red,blue,npcs,bullets,powerups)
+        | _ -> failwith "bad game_data in bubble") 
     | _ -> failwith "bad bullet type in handle_shoot" in
   { game with data = data' }
 
