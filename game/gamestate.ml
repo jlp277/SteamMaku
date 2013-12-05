@@ -3,7 +3,7 @@ module Gamestate = struct
 open Definitions
 open Constants
 open Util
-include Game
+open 3
 
 (* updates player hit by enemy bullet *)
 let victim (team : team_data) : team_data =
@@ -22,9 +22,9 @@ let shooter (team : team_data) : team_data =
 (* updates player's list of movements *)
 let handle_move (game : game) (col : color) (dir_lst : direction list) : game =
   if col = Red then
-    { game with red_moves = dir_lst }
+    (*{ game with red_moves = dir_lst }*) game
   else
-    { game with blue_moves = dir_lst }
+    (*{ game with blue_moves = dir_lst }*) game
 
 (* returns position of player *)
 let get_p_pos game col =
@@ -66,12 +66,12 @@ let can_shoot team b_type : bool =
 let rec build_targets_spread acc orig_v i =
   if i = cSPREAD_NUM+1 then acc
   else
-    let new_v = rotate_deg orig_v ((360/cSPREAD_NUM)*i) in
-    build_targets (new_v::acc) orig_v i+1
+    let new_v = rotate_deg orig_v ((360./.float_of_int(cSPREAD_NUM))*.float_of_int(i)) in
+    build_targets_spread (new_v::acc) orig_v (i+1)
 
 let rec build_targets_trail orig_v =
-  (rotate_deg orig_v cTRAIL_ANGLE)::
-  (rotate_deg orig_v 360-cTRAIL_ANGLE)::
+  (rotate_deg orig_v (float_of_int cTRAIL_ANGLE))::
+  (rotate_deg orig_v (float_of_int(360-cTRAIL_ANGLE)))::
   (orig_v)::[]
 
 (* updates list of active bullets *)
@@ -83,7 +83,7 @@ let handle_shoot game col b_type target b_acc =
         b_type = Bubble;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = get_vel (subt_v target p_pos) (speed_of_bullet Bubble);
+        b_vel = get_vel (subt_v target p_pos) (float_of_int(speed_of_bullet Bubble));
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Bubble;
         b_color = col } in

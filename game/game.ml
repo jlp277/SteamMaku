@@ -16,6 +16,8 @@ type game = {
   blue_bomb : bool;
 }
 
+let set_rmoves (g:game) (mv_lst:direction list) : game =
+  {g with red_moves = mv_lst}
 
 let init_game () : game =
   let rx = 1./.8. *. float_of_int cBOARD_WIDTH in
