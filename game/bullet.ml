@@ -141,7 +141,7 @@ let rec update (bullets : bullet list) : bullet list =
     let vel' = add_v (vx, vy) (ax, ay) in
     {h with b_pos = pos'; b_vel = vel'} :: update t
 
-(*remove the bullet b from the bullit list lst*)
+(*remove the bullet b from the bullet list lst*)
 let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
   match lst with
   | [] -> []
@@ -153,13 +153,23 @@ let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
     else
       h::(remove_bullet b t)
 
-(*method to remove all bullets from a bullet list from the gui*)
-let rec gui_clear_bullets (bullets : bullet list) : unit =
-  match bullets with
-  | [] -> ()
-  | h::t ->
-    let _ = print_endline(string_of_int(h.b_id)) in
-    let _ = add_update (DeleteBullet(h.b_id)) in
-    gui_clear_bullets t
+let rec build_targets_spread acc orig_v i =
+  if i = cSPREAD_NUM+1 then acc
+  else
+    let new_v = rotate_deg orig_v (float_of_int ((360/cSPREAD_NUM)*i)) in
+    build_targets_spread (new_v::acc) orig_v (i+1)
+
+let rec build_targets_trail orig_v =
+  (rotate_deg orig_v (float_of_int cTRAIL_ANGLE))::
+  (rotate_deg orig_v (float_of_int(360-cTRAIL_ANGLE)))::
+  (orig_v)::[]
+
+(* calculates velocity *)
+let calc_vel vector speed : velocity =
+  scale speed (unit_v vector)
+
+(* calculates capped acceleration *)
+let calc_acc acc : acceleration =
+  if (magnitude acc) >= cACCEL_LIMIT then (0.,0.) else acc
 
 (* end *)

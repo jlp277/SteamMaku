@@ -60,6 +60,7 @@ game/game.exe:             \
 	game/netgraphics.cmo  \
   game/bullet.cmo \
   game/player.cmo \
+  game/gui.cmo \
   game/gamestate.cmo \
   game/game.cmo \
   game/server.cmo  

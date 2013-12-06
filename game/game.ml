@@ -5,6 +5,7 @@ open Netgraphics
 include Bullet
 include Player
 include Gamestate
+include Gui
 
 type game = Gamestate.my_game
 
@@ -85,10 +86,10 @@ let handle_time game =
         | (hit, bull)::t ->
           if (hit.p_color = Red) then
             if game.red_inv <= 0 then
-              let red' = Gamestate.victim red' in
-              let blue' = Gamestate.shooter blue' in
+              let red' = Player.victim red' in
+              let blue' = Player.shooter blue' in
               (* remove all bullets from the screen *)
-              let _ = Bullet.gui_clear_bullets bullet' in
+              let _ = Gui.gui_clear_bullets bullet' in
               let bullet' = [] in
               let _ = red_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullet' t
@@ -97,10 +98,10 @@ let handle_time game =
               handle_colls red' blue' bullet' t
           else if (hit.p_color = Blue) then
             if game.blue_inv <= 0 then
-              let blue' = Gamestate.victim blue' in
-              let red' = Gamestate.shooter red' in
+              let blue' = Player.victim blue' in
+              let red' = Player.shooter red' in
               (* remove all bullets from the screen *)
-              let _ = Bullet.gui_clear_bullets bullet' in
+              let _ = Gui.gui_clear_bullets bullet' in
               let bullet' = [] in
               let _ = blue_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullet' t
@@ -119,14 +120,14 @@ let handle_time game =
           (* check for bomb invincibility *)
           if (gra.p_color = Red) then
             if not game.red_bomb then
-              let red' = Gamestate.grazed red' in
+              let red' = Player.grazed red' in
               handle_grazs red' blue' bullets' t
             else
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else if (gra.p_color = Blue) then
             if not game.blue_bomb then
-              let blue' = Gamestate.grazed blue' in
+              let blue' = Player.grazed blue' in
               handle_grazs red' blue' bullets' t
             else
               let bullets' = Bullet.remove_bullet bull bullets' in

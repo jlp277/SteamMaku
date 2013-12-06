@@ -16,12 +16,6 @@
     blue_bomb : bool;
   }
 
-  val victim : team_data -> team_data
-
-  val shooter : team_data -> team_data
-
-  val grazed : team_data -> team_data
-
   val handle_move : my_game -> color -> (direction * direction) list -> my_game
 
   val handle_shoot : my_game -> color -> bullet_type -> position -> 
