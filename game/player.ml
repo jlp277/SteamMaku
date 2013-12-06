@@ -72,6 +72,11 @@ let can_shoot team b_type : bool =
   | (lives,bomb,score,power,charge,player) ->
     (charge-(cost_of_bullet b_type)) >= 0
 
+let can_bomb team : bool =
+  match team with
+  | (lives,bomb,score,power,charge,player) ->
+    (bomb - 1) >= 0
+
 (* returns position of player *)
 let get_p_pos data col =
   match data with

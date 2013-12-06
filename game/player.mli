@@ -17,6 +17,8 @@
   
   val can_shoot : team_data -> bullet_type -> bool 
 
+  val can_bomb : team_data -> bool
+
   val get_p_pos : game_data -> color -> position
 
 (* end *)
