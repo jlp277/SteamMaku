@@ -233,10 +233,10 @@ let check_result (data: game_data) (duration: float) : result =
     | (red,blue,npcs,bullets,power) ->
       let r_stats = (
         match red with
-        | (lives,_,score,_,_,_) -> (lives,score) ) in
+        | (lives,_,score,_,_,_) -> (score,lives) ) in
       let b_stats = (
         match blue with
-        | (lives,_,score,_,_,_) -> (lives,score) ) in
+        | (lives,_,score,_,_,_) -> (score,lives) ) in
       (r_stats,b_stats) in
   let _ = print_endline(string_of_int(r_lives)) in
   let _ = print_endline(string_of_int(b_lives)) in
