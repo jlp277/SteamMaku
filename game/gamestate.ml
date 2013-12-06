@@ -81,9 +81,9 @@ let can_shoot team b_type : bool =
     (charge-(cost_of_bullet b_type)) >= 0
 
 let rec build_targets_spread acc orig_v i =
-  if i = cSPREAD_NUM then acc
+  if i = cSPREAD_NUM+1 then acc
   else
-    let new_v = rotate_deg orig_v (float_of_int (360/(cSPREAD_NUM*i))) in
+    let new_v = rotate_deg orig_v ((360./.float_of_int(cSPREAD_NUM))*.float_of_int(i)) in
     build_targets_spread (new_v::acc) orig_v (i+1)
 
 let rec build_targets_trail orig_v =
@@ -249,6 +249,8 @@ let check_result (data: game_data) (duration: float) : result =
         match blue with
         | (lives,_,score,_,_,_) -> (score,lives) ) in
       (r_stats,b_stats) in
+  let _ = print_endline(string_of_int(r_lives)) in
+  let _ = print_endline(string_of_int(b_lives)) in
   match (r_lives,b_lives,duration,r_score,b_score) with
   | (0,0,0.,r_score,b_score) -> check_score r_score b_score
   | (0,0,duration,r_score,b_score) -> check_score r_score b_score
