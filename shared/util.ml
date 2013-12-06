@@ -90,7 +90,7 @@ let rotate (x, y) theta =
   (x *. cost -. y *. sint, x *. sint +. y *. cost)
 
 (* Rotates a vector by theta degrees. But why would you use degrees? *)
-let rotate_deg (x,y) theta = rotate (x,y) (rad_to_deg theta)
+let rotate_deg (x,y) theta = rotate (x,y) (deg_to_rad theta)
 
 let scale s (x, y) =
   (s *. x, s *. y)
