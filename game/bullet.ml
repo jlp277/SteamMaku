@@ -136,10 +136,16 @@ let rec update (bullets : bullet list) : bullet list =
     let (ax, ay) = h.b_accel in
     let (px, py) = h.b_pos in
     let pos' = add_v (px, py) (vx, vy) in
-    (* update the position of the bullet on the gui *)
-    let _ = add_update (MoveBullet(h.b_id,pos')) in
-    let vel' = add_v (vx, vy) (ax, ay) in
-    {h with b_pos = pos'; b_vel = vel'} :: update t
+    (* check to see if the bullet in in bounds*)
+    if in_bounds pos' then
+      (* update the position of the bullet on the gui *)
+      let _ = add_update (MoveBullet(h.b_id,pos')) in
+      let vel' = add_v (vx, vy) (ax, ay) in
+      {h with b_pos = pos'; b_vel = vel'} :: update t
+    else
+      (* remove the bullet from the list and the gui *)
+      let _ = add_update (DeleteBullet(h.b_id)) in
+      update t
 
 (*remove the bullet b from the bullet list lst*)
 let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
