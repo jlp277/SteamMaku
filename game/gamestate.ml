@@ -186,8 +186,8 @@ let update_game (game : my_game) : my_game =
       let bullets' = Bullet.update bullets in
       let red' = Player.update_pos game.red_moves red in
       let blue' = Player.update_pos game.blue_moves blue in
-      let red' = Player.add_charge red' in
-      let blue' = Player.add_charge blue' in
+      let red' = if not game.red_bomb then Player.add_charge red' else red' in
+      let blue' = if not game.blue_bomb then Player.add_charge blue' else blue' in
       let rec handle_colls red' blue' bullet' lst =
         match lst with
         | [] -> (red',blue',bullet')
@@ -217,15 +217,11 @@ let update_game (game : my_game) : my_game =
               let bullet' = Bullet.remove_bullet bull bullet' in
               handle_colls red' blue' bullet' t
           else
-            (* let red' = red' in
-            let blue' = blue' in
-            let bullet' = bullet' in *)
             handle_colls red' blue' bullet' t in
       let rec handle_grazs red' blue' bullets' lst =
         match lst with
         | [] -> (red',blue',bullets')
         | (gra, bull)::t ->
-          (* check for bomb invincibility *)
           if (gra.p_color = Red) then
             if not game.red_bomb then
               let red' = Player.grazed red' in
@@ -239,14 +235,10 @@ let update_game (game : my_game) : my_game =
               let blue' = Player.grazed blue' in
               handle_grazs red' blue' bullets' t
             else
-              (* remove the bullet from the gui *)
               let _ = add_update (DeleteBullet(bull.b_id)) in
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else
-            (* let red' = red' in
-            let blue' = blue' in
-            let bullets' = bullets' in *)
             handle_grazs red' blue' bullets' t in
       let (collisions,grazes) = Bullet.check_contacts (red',blue',npcs,bullets',powerups) in
       let (red',blue',bullets') = handle_colls red' blue' bullets' collisions in
