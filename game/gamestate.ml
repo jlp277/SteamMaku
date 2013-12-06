@@ -211,7 +211,18 @@ let handle_focus game col f_bool =
 let handle_bomb game col =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
-      (red,blue,npcs,[],power) in
+      if col = Red then
+        let red' = (
+          match red with
+          | (lives,bomb,score,power,charge,player) ->
+            (lives,bomb - 1,score,power,charge,player) ) in
+        (red',blue,npcs,[],power)
+      else
+        let blue' = (
+          match blue with
+          | (lives,bomb,score,power,charge,player) ->
+            (lives,bomb - 1,score,power,charge,player) ) in
+        (red,blue',npcs,[],power) in
   if col = Red then
     (* signal the gui for a red bomb *)
     let _ = add_update (UseBomb(Red)) in
