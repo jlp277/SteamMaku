@@ -135,14 +135,17 @@ let handle_bomb game col =
         (red,blue',npcs,[],power)
       else
         (red,blue,npcs,bullets,power) in
-  if col = Red then
+  let (red,blue,_,_,_) = game.data in
+  if col = Red & (Player.can_bomb red) then
     (* signal the gui for a red bomb *)
     let _ = add_update (UseBomb(Red)) in
     { game with data = data'; red_inv = cBOMB_DURATION; red_bomb = true }
-  else
+  else if col = Blue & (Player.can_bomb blue) then
     (* signal the gui for a red bomb *)
     let _ = add_update (UseBomb(Blue)) in
     { game with data = data'; blue_inv = cBOMB_DURATION; blue_bomb = true }
+  else
+    game
 
 (* returns state of game *)
 let check_result (data: game_data) (duration: float) : result =
