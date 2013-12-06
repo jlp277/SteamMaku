@@ -68,7 +68,7 @@ let init_game () : game =
 
 
 let handle_time game =
-  let duration' = game.duration +. cUPDATE_TIME in
+  let duration' = game.duration -. cUPDATE_TIME in
   let red_inv : int ref = ref game.red_inv in
   let blue_inv : int ref = ref game.blue_inv in
   let data' =
@@ -108,9 +108,9 @@ let handle_time game =
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_colls red' blue' bullets' t
           else
-            let red' = red' in
+            (* let red' = red' in
             let blue' = blue' in
-            let bullets' = bullets' in
+            let bullets' = bullets' in *)
             handle_colls red' blue' bullets' t in
       let rec handle_grazs red' blue' bullets' lst =
         match lst with
@@ -132,9 +132,9 @@ let handle_time game =
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else
-            let red' = red' in
+            (* let red' = red' in
             let blue' = blue' in
-            let bullets' = bullets' in
+            let bullets' = bullets' in *)
             handle_grazs red' blue' bullets' t in
       let (collisions,grazes) = Bullet.check_contacts (red',blue',npcs,bullets',powerups) in
       let (red',blue',bullets') = handle_colls red' blue' bullets' collisions in
