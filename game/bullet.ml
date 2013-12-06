@@ -3,6 +3,7 @@
 open Definitions
 open Constants
 open Util
+open Netgraphics
 
 (*checks to see if the bullet b has collided with the player p
  *returns false if the bullet and the player are the same color
@@ -135,6 +136,8 @@ let rec update (bullets : bullet list) : bullet list =
     let (ax, ay) = h.b_accel in
     let (px, py) = h.b_pos in
     let pos' = add_v (px, py) (vx, vy) in
+    (* update the position of the bullet on the gui *)
+    let _ = add_update (MoveBullet(h.b_id,pos')) in
     let vel' = add_v (vx, vy) (ax, ay) in
     {h with b_pos = pos'; b_vel = vel'} :: update t
 
@@ -144,8 +147,18 @@ let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
   | [] -> []
   | h::t ->
     if h.b_id = b.b_id then
+      (* remove bullet from the gui *)
+      let _ = add_update (DeleteBullet(b.b_id)) in
       t
     else
       h::(remove_bullet b t)
+
+(*method to remove all bullets from a bullet list from the gui*)
+let rec gui_clear_bullets (bullets : bullet list) : unit =
+  match bullets with
+  | [] -> ()
+  | h::t ->
+    let _ = add_update (DeleteBullet(h.b_id)) in
+    gui_clear_bullets t
 
 (* end *)

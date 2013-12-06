@@ -3,6 +3,7 @@
 open Definitions
 open Constants
 open Util
+open Netgraphics
 
 type my_game = {
     duration : float;
@@ -19,18 +20,24 @@ type my_game = {
 let victim (team : team_data) : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
+    (*decrease this players lives in the gui*)
+    let _ = add_update (SetLives(player.p_color,(lives-1))) in
     (lives - 1,cINITIAL_BOMBS,score,power/2,charge,player)
 
 (* updates player who hit enemy with bullet *)
 let shooter (team : team_data) : team_data = 
   match team with
   | (lives,bomb,score,power,charge,player) ->
+    (*increase the points for this player in the gui*)
+    let _ = add_update (SetScore(player.p_color,(score+cKILL_POINTS))) in
     (lives,bomb,score+cKILL_POINTS,power,charge,player)
 
 (*updates player who was grazed by a bullet*)
 let grazed (team : team_data) : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
+    (*increase the score of this player*)
+    let _ = add_update (SetScore(player.p_color,(score+cGRAZE_POINTS))) in
     (lives,bomb,score+cGRAZE_POINTS,power,charge,player)
 
 
@@ -84,6 +91,14 @@ let rec build_targets_trail orig_v =
   (rotate_deg orig_v (float_of_int(360-cTRAIL_ANGLE)))::
   (orig_v)::[]
 
+(* helper function to add a list of bullets to the gui *)
+let rec gui_add_bullets (bullets : bullet list) : unit =
+  match bullets with
+  | [] -> ()
+  | h::t ->
+    let _ = add_update (AddBullet(h.b_id, h.b_color, h.b_type, h.b_pos)) in
+    gui_add_bullets t
+
 (* updates list of active bullets *)
 let handle_shoot (game : my_game) col b_type target b_acc =
   let p_pos = get_p_pos game.data col in
@@ -101,9 +116,13 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         | (red,blue,npcs,bullets,powerups) ->
           if col = Red & (can_shoot red Bubble) then
             let red' = dec_charge red (cost_of_bullet Bubble) in
+            (* add this bullet to the gui *)
+            let _ = add_update (AddBullet(bubble.b_id,Red,Bubble,bubble.b_pos)) in
             (red',blue,npcs,(bubble::bullets),powerups)
           else if col = Blue & (can_shoot blue Bubble) then
             let blue' = dec_charge blue (cost_of_bullet Bubble) in
+            (* add this bullet to the gui *)
+            let _ = add_update (AddBullet(bubble.b_id,Blue,Bubble,bubble.b_pos)) in
             (red,blue',npcs,(bubble::bullets),powerups)
           else
             (red,blue,npcs,bullets,powerups) )
@@ -123,9 +142,13 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         | (red,blue,npcs,bullets,powerups) ->
           if col = Red & (can_shoot red Spread) then
             let red' = dec_charge red (cost_of_bullet Spread) in
+            (* add this list of bullets to the gui *)
+            let _ = gui_add_bullets spread_list in
             (red',blue,npcs,(spread_list@bullets),powerups)
           else if col = Blue & (can_shoot blue Spread) then
             let blue' = dec_charge blue (cost_of_bullet Spread) in
+            (* add this list of bullets to the gui *)
+            let _ = gui_add_bullets spread_list in
             (red,blue',npcs,(spread_list@bullets),powerups)
           else
             (red,blue,npcs,bullets,powerups) )
@@ -151,9 +174,13 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         | (red,blue,npcs,bullets,powerups) ->
           if col = Red & (can_shoot red Trail) then
             let red' = dec_charge red (cost_of_bullet Trail) in
+            (* add this list of bullets to the gui *)
+            let _ = gui_add_bullets trail_list in
             (red',blue,npcs,(trail_list@bullets),powerups)
           else if col = Blue & (can_shoot blue Trail) then
             let blue' = dec_charge blue (cost_of_bullet Trail) in
+            (* add this list of bullets to the gui *)
+            let _ = gui_add_bullets trail_list in
             (red,blue',npcs,(trail_list@bullets),powerups)
           else
             (red,blue,npcs,bullets,powerups) ) 
@@ -186,8 +213,12 @@ let handle_bomb game col =
     | (red,blue,npcs,bullets,power) ->
       (red,blue,npcs,[],power) in
   if col = Red then
+    (* signal the gui for a red bomb *)
+    let _ = add_update (UseBomb(Red)) in
     { game with data = data'; red_inv = cBOMB_DURATION; red_bomb = true }
   else
+    (* signal the gui for a red bomb *)
+    let _ = add_update (UseBomb(Blue)) in
     { game with data = data'; blue_inv = cBOMB_DURATION; blue_bomb = true }
 
 let check_score r_score b_score : result =

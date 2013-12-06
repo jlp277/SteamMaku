@@ -9,4 +9,6 @@
 
   val remove_bullet : bullet -> bullet list -> bullet list
 
+  val gui_clear_bullets : bullet list -> unit
+
 (* end *)

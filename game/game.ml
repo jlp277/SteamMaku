@@ -1,6 +1,7 @@
 open Definitions
 open Constants
 open Util
+open Netgraphics
 include Bullet
 include Player
 include Gamestate
@@ -22,6 +23,8 @@ let init_game () : game =
     p_radius = cHITBOX_RADIUS;
     p_color = Red
   } in
+  (* put the red player onto the board *)
+  let _ = add_update (AddPlayer((p_red.p_id,p_red.p_color,p_red.p_pos))) in
   let p_blue : player_char = {
     p_id = next_available_id ();
     p_pos = (bx, by);
@@ -29,9 +32,27 @@ let init_game () : game =
     p_radius = cHITBOX_RADIUS;
     p_color = Blue
   } in
+  (* put the blue player onto the board *)
+  let _ = add_update (AddPlayer((p_blue.p_id,p_blue.p_color,p_blue.p_pos))) in
+
+
   (*lives,bombs,score,power,charge,p_red*)
   let red = (cINITIAL_LIVES,cINITIAL_BOMBS,0,0,0,p_red) in
+  (* put the red data on the board *)
+  let _ = add_update (SetBombs(Red,cINITIAL_BOMBS)) in
+  let _ = add_update (SetLives(Red,cINITIAL_LIVES)) in 
+  let _ = add_update (SetScore(Red,0)) in
+  let _ = add_update (SetPower(Red,0)) in
+  let _ = add_update (SetCharge(Red,0)) in 
+
   let blue = (cINITIAL_LIVES,cINITIAL_BOMBS,0,0,0,p_blue) in
+  (* put the blue data on the board *)
+  let _ = add_update (SetBombs(Blue,cINITIAL_BOMBS)) in
+  let _ = add_update (SetLives(Blue,cINITIAL_LIVES)) in 
+  let _ = add_update (SetScore(Blue,0)) in
+  let _ = add_update (SetPower(Blue,0)) in
+  let _ = add_update (SetCharge(Blue,0)) in 
+
   let n_data = (red,blue,[],[],[]) in
   let new_game = {
     duration = cTIME_LIMIT;
@@ -66,6 +87,8 @@ let handle_time game =
             if game.red_inv <= 0 then
               let red' = Gamestate.victim red' in
               let blue' = Gamestate.shooter blue' in
+              (* remove all bullets from the screen *)
+              let _ = Bullet.gui_clear_bullets bullets' in
               let bullets' = [] in
               let _ = red_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullets' t
@@ -76,6 +99,8 @@ let handle_time game =
             if game.blue_inv <= 0 then
               let blue' = Gamestate.victim blue' in
               let red' = Gamestate.shooter red' in
+              (* remove all bullets from the screen *)
+              let _ = Bullet.gui_clear_bullets bullets' in
               let bullets' = [] in
               let _ = blue_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullets' t
