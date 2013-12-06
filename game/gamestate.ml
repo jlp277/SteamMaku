@@ -26,6 +26,23 @@ let handle_move (game : my_game) (col : color) (dir_lst : (direction * direction
   else
     { game with blue_moves = dir_lst }
 
+let add_bullets (data : game_data) (col : color) (b_type : bullet_type) (new_b : bullet list) : game_data =
+  match data with
+  | (red,blue,npcs,bullets,powerups) ->
+    if col = Red & (Player.can_shoot red b_type) then
+      let red' = Player.dec_charge red (cost_of_bullet b_type) in
+      (* add bullets to the gui *)
+      let _ = Gui.gui_add_bullets new_b in
+      let _ = add_update (AddBullet(bubble.b_id,Red,Bubble,bubble.b_pos)) in
+      (red',blue,npcs,(new_b@bullets),powerups)
+    else if col = Blue & (Player.can_shoot blue Bubble) then
+      let blue' = Player.dec_charge blue (cost_of_bullet Bubble) in
+      (* add bullets to the gui *)
+      let _ = Gui.gui_add_bullets new_b in
+      (red,blue',npcs,(new_b@bullets),powerups)
+    else
+      (red,blue,npcs,bullets,powerups) 
+
 (* updates list of active bullets *)
 let handle_shoot (game : my_game) col b_type target b_acc =
   let p_pos = Player.get_p_pos game.data col in
@@ -39,20 +56,8 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Bubble;
         b_color = col } in
-      (match game.data with
-        | (red,blue,npcs,bullets,powerups) ->
-          if col = Red & (Player.can_shoot red Bubble) then
-            let red' = Player.dec_charge red (cost_of_bullet Bubble) in
-            (* add this bullet to the gui *)
-            let _ = add_update (AddBullet(bubble.b_id,Red,Bubble,bubble.b_pos)) in
-            (red',blue,npcs,(bubble::bullets),powerups)
-          else if col = Blue & (Player.can_shoot blue Bubble) then
-            let blue' = Player.dec_charge blue (cost_of_bullet Bubble) in
-            (* add this bullet to the gui *)
-            let _ = add_update (AddBullet(bubble.b_id,Blue,Bubble,bubble.b_pos)) in
-            (red,blue',npcs,(bubble::bullets),powerups)
-          else
-            (red,blue,npcs,bullets,powerups) )
+      let new_b = [bubble] in
+      add_bullets game.data col b_type new_b
     | Spread ->
       let spread target' : bullet = {
         b_type = Spread;  
@@ -63,22 +68,9 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_radius = radius_of_bullet Spread;
         b_color = col } in
       let targets = Bullet.build_targets_spread [] (subt_v target p_pos) 0 in
-      let spread_list =
+      let new_b =
         List.fold_left (fun a target' -> (spread target')::a) [] targets in
-      (match game.data with
-        | (red,blue,npcs,bullets,powerups) ->
-          if col = Red & (Player.can_shoot red Spread) then
-            let red' = Player.dec_charge red (cost_of_bullet Spread) in
-            (* add this list of bullets to the gui *)
-            let _ = Gui.gui_add_bullets spread_list in
-            (red',blue,npcs,(spread_list@bullets),powerups)
-          else if col = Blue & (Player.can_shoot blue Spread) then
-            let blue' = Player.dec_charge blue (cost_of_bullet Spread) in
-            (* add this list of bullets to the gui *)
-            let _ = Gui.gui_add_bullets spread_list in
-            (red,blue',npcs,(spread_list@bullets),powerups)
-          else
-            (red,blue,npcs,bullets,powerups) )
+      add_bullets game.data col b_type new_b
     | Trail ->
       let trail target' step : bullet = {
         b_type = Trail;  
@@ -96,22 +88,11 @@ let handle_shoot (game : my_game) col b_type target b_acc =
             let new_trail_bullet = trail target' (cTRAIL_SPEED_STEP*i) in
             create_trail_bullets (new_trail_bullet::acc) (i+1) in
         create_trail_bullets acc 1 in
-      let trail_list = List.fold_left create_trail [] targets in
-      (match game.data with
-        | (red,blue,npcs,bullets,powerups) ->
-          if col = Red & (Player.can_shoot red Trail) then
-            let red' = Player.dec_charge red (cost_of_bullet Trail) in
-            (* add this list of bullets to the gui *)
-            let _ = Gui.gui_add_bullets trail_list in
-            (red',blue,npcs,(trail_list@bullets),powerups)
-          else if col = Blue & (Player.can_shoot blue Trail) then
-            let blue' = Player.dec_charge blue (cost_of_bullet Trail) in
-            (* add this list of bullets to the gui *)
-            let _ = Gui.gui_add_bullets trail_list in
-            (red,blue',npcs,(trail_list@bullets),powerups)
-          else
-            (red,blue,npcs,bullets,powerups) ) 
-    | Power -> failwith "No powerups!" in
+      let new_b = List.fold_left create_trail [] targets in
+      add_bullets game.data col b_type new_b
+    | Power ->
+      let new_b = [] in
+      add_bullets game.data col b_type new_b in
   { game with data = data' }
 
 (* updates player's focus state *)
