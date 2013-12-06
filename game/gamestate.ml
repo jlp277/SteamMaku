@@ -83,7 +83,7 @@ let can_shoot team b_type : bool =
 let rec build_targets_spread acc orig_v i =
   if i = cSPREAD_NUM+1 then acc
   else
-    let new_v = rotate_deg orig_v ((360./.float_of_int(cSPREAD_NUM))*.float_of_int(i)) in
+    let new_v = rotate_deg orig_v (float_of_int ((360/cSPREAD_NUM)*i)) in
     build_targets_spread (new_v::acc) orig_v (i+1)
 
 let rec build_targets_trail orig_v =
