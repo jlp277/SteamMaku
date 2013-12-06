@@ -1,4 +1,4 @@
-module Bullet = struct
+(* module Bullet : Bullet = struct *)
 
 open Definitions
 open Constants
@@ -148,4 +148,4 @@ let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
     else
       h::(remove_bullet b t)
 
-end
+(* end *)

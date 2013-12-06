@@ -1,44 +1,56 @@
-module Gamestate = struct
+(*module Gamestate : Gamestate = struct*)
 
 open Definitions
 open Constants
 open Util
-open 3
+
+type my_game = {
+    duration : float;
+    data : game_data;
+    red_moves : (direction * direction) list;
+    blue_moves : (direction * direction) list;
+    red_inv : int;
+    blue_inv : int;
+    red_bomb : bool;
+    blue_bomb : bool;
+  }
 
 (* updates player hit by enemy bullet *)
 let victim (team : team_data) : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (lives - 1,cINITIAL_BOMBS,score,power/2,charge,player)
-  | _ -> failwith "bad team_data in handle_focus"
 
 (* updates player who hit enemy with bullet *)
 let shooter (team : team_data) : team_data = 
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (lives,bomb,score+cKILL_POINTS,power,charge,player)
-  | _ -> failwith "bad team_data in handle_focus"
+
+(*updates player who was grazed by a bullet*)
+let grazed (team : team_data) : team_data =
+  match team with
+  | (lives,bomb,score,power,charge,player) ->
+    (lives,bomb,score+cGRAZE_POINTS,power,charge,player)
+
 
 (* updates player's list of movements *)
-let handle_move (game : game) (col : color) (dir_lst : direction list) : game =
+let handle_move (game : my_game) (col : color) (dir_lst : (direction * direction) list) : my_game =
   if col = Red then
-    (*{ game with red_moves = dir_lst }*) game
+    { game with red_moves = dir_lst }
   else
-    (*{ game with blue_moves = dir_lst }*) game
+    { game with blue_moves = dir_lst }
 
 (* returns position of player *)
-let get_p_pos game col =
-  match game with
+let get_p_pos data col =
+  match data with
     | (red,blue,_,_,_) ->
       if col = Red then (
         match red with
-        | (_,_,_,_,_,player) -> player.p_pos
-        | _ -> failwith "bad team_data in handle_shoot" )
+        | (_,_,_,_,_,player) -> player.p_pos )
       else (
         match blue with
-        | (_,_,_,_,_,player) -> player.p_pos
-        | _ -> failwith "bad team_data in handle_shoot" )
-    | _ -> failwith "bad game in handle_shoot"
+        | (_,_,_,_,_,player) -> player.p_pos )
 
 (* returns velocity *)
 let get_vel vector speed : velocity =
@@ -54,14 +66,12 @@ let dec_charge team amt : team_data =
   | (lives,bomb,score,power,charge,player) ->
     let charge' = if charge-amt < 0 then 0 else charge-amt in
     (lives,bomb,score,power,charge',player)
-  | _ -> failwith "bad team_data in dec_charge"
 
 (* checks if player has enough charge to shoot *)
 let can_shoot team b_type : bool =
   match team with
   | (lives,bomb,score,power,charge,player) ->
     (charge-(cost_of_bullet b_type)) >= 0
-  | _ -> failwith "bad team_data in can_shoot"
 
 let rec build_targets_spread acc orig_v i =
   if i = cSPREAD_NUM+1 then acc
@@ -75,8 +85,8 @@ let rec build_targets_trail orig_v =
   (orig_v)::[]
 
 (* updates list of active bullets *)
-let handle_shoot game col b_type target b_acc =
-  let p_pos = get_p_pos game col in
+let handle_shoot (game : my_game) col b_type target b_acc =
+  let p_pos = get_p_pos game.data col in
   let data' = match b_type with
     | Bubble ->
       let bubble : bullet = {
@@ -96,14 +106,13 @@ let handle_shoot game col b_type target b_acc =
             let blue' = dec_charge blue (cost_of_bullet Bubble) in
             (red,blue',npcs,(bubble::bullets),powerups)
           else
-            (red,blue,npcs,bullets,powerups)
-        | _ -> failwith "bad game_data in bubble")
+            (red,blue,npcs,bullets,powerups) )
     | Spread ->
       let spread target' : bullet = {
         b_type = Spread;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = get_vel target' (speed_of_bullet Bubble);
+        b_vel = get_vel target' (float_of_int (speed_of_bullet Bubble));
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Spread;
         b_color = col } in
@@ -119,14 +128,13 @@ let handle_shoot game col b_type target b_acc =
             let blue' = dec_charge blue (cost_of_bullet Spread) in
             (red,blue',npcs,(spread_list@bullets),powerups)
           else
-            (red,blue,npcs,bullets,powerups)
-        | _ -> failwith "bad game_data in bubble")
+            (red,blue,npcs,bullets,powerups) )
     | Trail ->
       let trail target' step : bullet = {
         b_type = Trail;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = get_vel target' ((speed_of_bullet Trail)*step);
+        b_vel = get_vel target' (float_of_int ((speed_of_bullet Trail)*step));
         b_accel = get_acc b_acc;
         b_radius = radius_of_bullet Trail;
         b_color = col } in
@@ -135,8 +143,8 @@ let handle_shoot game col b_type target b_acc =
         let rec create_trail_bullets acc i =
           if i = cTRAIL_NUM+1 then acc
           else
-            let new_trail_bullet = trail target' cTRAIL_SPEED_STEP*i in
-            create_trail_bullets (new_trail_bullet::acc) i+1 in
+            let new_trail_bullet = trail target' (cTRAIL_SPEED_STEP*i) in
+            create_trail_bullets (new_trail_bullet::acc) (i+1) in
         create_trail_bullets acc 1 in
       let trail_list = List.fold_left create_trail [] targets in
       (match game.data with
@@ -148,30 +156,35 @@ let handle_shoot game col b_type target b_acc =
             let blue' = dec_charge blue (cost_of_bullet Trail) in
             (red,blue',npcs,(trail_list@bullets),powerups)
           else
-            (red,blue,npcs,bullets,powerups)
-        | _ -> failwith "bad game_data in bubble") 
-    | _ -> failwith "bad bullet type in handle_shoot" in
+            (red,blue,npcs,bullets,powerups) ) 
+    | Power -> failwith "No powerups!" in
   { game with data = data' }
 
 (* updates player's focus state *)
 let handle_focus game col f_bool =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
-      let team = if col = Red then red else blue in
-      (match team with
-        | (lives,bomb,score,power,charge,player) ->
-          let player' = { player with p_focused = f_bool } in
-          (lives,bomb,score,power,charge,player')
-        | _ -> failwith "bad team_data in handle_focus" )
-    | _ -> failwith "bad game_data in handle_focus" in
+      if col = Red then
+        let red' = (
+          match red with
+          | (lives,bomb,score,power,charge,player) ->
+            let player' = { player with p_focused = f_bool } in
+            (lives,bomb,score,power,charge,player') ) in
+        (red',blue,npcs,bullets,power)
+      else
+        let blue' = (
+          match blue with
+          | (lives,bomb,score,power,charge,player) ->
+            let player' = { player with p_focused = f_bool } in
+            (lives,bomb,score,power,charge,player') ) in
+        (red,blue',npcs,bullets,power) in
   { game with data = data' }
 
 (* updates game when a player has used a bomb *)
 let handle_bomb game col =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
-      (red,blue,npcs,[],power)
-    | _ -> failwith "bad game_data in handle_bomb" in
+      (red,blue,npcs,[],power) in
   if col = Red then
     { game with data = data'; red_inv = cBOMB_DURATION; red_bomb = true }
   else
@@ -189,14 +202,11 @@ let check_result (data: game_data) (duration: float) : result =
     | (red,blue,npcs,bullets,power) ->
       let r_stats = (
         match red with
-        | (lives,_,score,_,_,_) -> (lives,score)
-        | _ -> failwith "bad team_data in check_result") in
+        | (lives,_,score,_,_,_) -> (lives,score) ) in
       let b_stats = (
         match blue with
-        | (lives,_,score,_,_,_) -> (lives,score)
-        | _ -> failwith "bad team_data in check_result") in
-      (r_stats,b_stats)
-    | _ -> failwith "bad game_data in check_result" in
+        | (lives,_,score,_,_,_) -> (lives,score) ) in
+      (r_stats,b_stats) in
   match (r_lives,b_lives,duration,r_score,b_score) with
   | (0,0,0.,r_score,b_score) -> check_score r_score b_score
   | (0,0,duration,r_score,b_score) -> check_score r_score b_score
@@ -206,4 +216,4 @@ let check_result (data: game_data) (duration: float) : result =
   | (r_lives,0,duration,r_score,b_score) -> Winner(Red)
   | (0,b_lives,duration,r_score,b_score) -> Winner(Blue)
   | (r_lives,b_lives,duration,r_score,b_score) -> Unfinished
-end
+(*end*)

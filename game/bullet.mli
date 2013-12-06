@@ -1,5 +1,5 @@
 (*Module Interface for Bullet*)
-module type Bullet = sig
+(* module type Bullet = sig *)
   open Definitions
   open Constants
 
@@ -9,4 +9,4 @@ module type Bullet = sig
 
   val remove_bullet : bullet -> bullet list -> bullet list
 
-end
+(* end *)
