@@ -16,11 +16,9 @@ let update_pos (dir_lst : (direction * direction) list) (team : team_data) : tea
     let p_pos' = match player.p_pos with
       | (x,y) ->
         let (x',y') = add_v (x,y) (v_x,v_y) in
-        if in_bounds (x',y') then (x',y') else (x,y)
-      | _ -> failwith "bad p_pos in update_pos" in
+        if in_bounds (x',y') then (x',y') else (x,y) in
     let player' = { player with p_pos = p_pos' } in
     (lives,bomb,score,power,charge,player')
-  | _ -> failwith "bad team_data in update_foc"
 
 let add_charge (team : team_data) : team_data = 
   let (lives, bombs, score, power, charge, player) = team in
