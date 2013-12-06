@@ -153,16 +153,21 @@ let rec remove_bullet (b : bullet) (lst : bullet list) : bullet list =
     else
       h::(remove_bullet b t)
 
-let rec build_targets_spread acc orig_v i =
-  if i = cSPREAD_NUM+1 then acc
-  else
-    let new_v = rotate_deg orig_v (float_of_int ((360/cSPREAD_NUM)*i)) in
-    build_targets_spread (new_v::acc) orig_v (i+1)
+let build_targets_bubble acc orig_v =
+  orig_v::acc
 
-let rec build_targets_trail orig_v =
+let build_targets_spread acc orig_v =
+  let rec r_build_targets_spread acc' i =
+    if i = cSPREAD_NUM+1 then acc'
+    else
+      let new_v = rotate_deg orig_v (float_of_int ((360/cSPREAD_NUM)*i)) in
+      r_build_targets_spread (new_v::acc') (i+1) in
+  r_build_targets_spread acc 0
+
+let build_targets_trail acc orig_v =
   (rotate_deg orig_v (float_of_int cTRAIL_ANGLE))::
   (rotate_deg orig_v (float_of_int(360-cTRAIL_ANGLE)))::
-  (orig_v)::[]
+  (orig_v)::acc
 
 (* calculates velocity *)
 let calc_vel vector speed : velocity =

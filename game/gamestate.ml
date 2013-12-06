@@ -47,15 +47,18 @@ let handle_shoot (game : my_game) col b_type target b_acc =
   let p_pos = Player.get_p_pos game.data col in
   let data' = match b_type with
     | Bubble ->
-      let bubble : bullet = {
+      let bubble target' : bullet = {
         b_type = Bubble;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = Bullet.calc_vel (subt_v target p_pos) (float_of_int(speed_of_bullet Bubble));
+        b_vel = Bullet.calc_vel target' (float_of_int(speed_of_bullet Bubble));
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Bubble;
         b_color = col } in
-      let new_b = [bubble] in
+      let targets = Bullet.build_targets_bubble [] (subt_v target p_pos) in
+      let create_bubble acc target' =
+        (bubble target')::acc in
+      let new_b = List.fold_left create_bubble [] targets in
       add_bullets game.data col b_type new_b
     | Spread ->
       let spread target' : bullet = {
@@ -66,9 +69,10 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Spread;
         b_color = col } in
-      let targets = Bullet.build_targets_spread [] (subt_v target p_pos) 0 in
-      let new_b =
-        List.fold_left (fun a target' -> (spread target')::a) [] targets in
+      let targets = Bullet.build_targets_spread [] (subt_v target p_pos) in
+      let create_spread acc target' =
+        (spread target')::acc in
+      let new_b = List.fold_left create_spread [] targets in
       add_bullets game.data col b_type new_b
     | Trail ->
       let trail target' step : bullet = {
@@ -79,7 +83,7 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Trail;
         b_color = col } in
-      let targets = Bullet.build_targets_trail (subt_v target p_pos) in
+      let targets = Bullet.build_targets_trail [] (subt_v target p_pos) in
       let create_trail acc target' =
         let rec create_trail_bullets acc i =
           if i = cTRAIL_NUM+1 then acc
@@ -90,6 +94,7 @@ let handle_shoot (game : my_game) col b_type target b_acc =
       let new_b = List.fold_left create_trail [] targets in
       add_bullets game.data col b_type new_b
     | Power ->
+      (* power ups not implemented *)
       let new_b = [] in
       add_bullets game.data col b_type new_b in
   { game with data = data' }
@@ -164,12 +169,8 @@ let check_result (data: game_data) (duration: float) : result =
         match blue with
         | (lives,_,score,_,_,_) -> (score,lives) ) in
       (r_stats,b_stats) in
-  match (r_lives,b_lives,duration,r_score,b_score) with(* 
-  | (0,0,0.,r_score,b_score) -> check_score r_score b_score *)
+  match (r_lives,b_lives,duration,r_score,b_score) with
   | (0,0,duration,r_score,b_score) -> check_score r_score b_score
-  (* | (0,b_lives,0.,r_score,b_score) -> Winner(Blue) *)
-  | (r_lives,0,0.,r_score,b_score) -> Winner(Red)
-  (* | (r_lives,b_lives,0.,r_score,b_score) -> check_score r_score b_score *)
   | (r_lives,0,duration,r_score,b_score) -> Winner(Red)
   | (0,b_lives,duration,r_score,b_score) -> Winner(Blue)
   | (r_lives,b_lives,duration,r_score,b_score) ->

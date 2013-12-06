@@ -80,12 +80,12 @@ let can_bomb team : bool =
 (* returns position of player *)
 let get_p_pos data col =
   match data with
-    | (red,blue,_,_,_) ->
-      if col = Red then (
-        match red with
-        | (_,_,_,_,_,player) -> player.p_pos )
-      else (
-        match blue with
-        | (_,_,_,_,_,player) -> player.p_pos )
+  | (red,blue,_,_,_) ->
+    if col = Red then (
+      match red with
+      | (_,_,_,_,_,player) -> player.p_pos )
+    else (
+      match blue with
+      | (_,_,_,_,_,player) -> player.p_pos )
 
 (* end *)
