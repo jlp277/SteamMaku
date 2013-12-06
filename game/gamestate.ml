@@ -243,6 +243,7 @@ let update_game (game : my_game) : my_game =
               let red' = Player.grazed red' in
               handle_grazs red' blue' bullets' t
             else
+              let _ = add_update (DeleteBullet(bull.b_id)) in
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else if (gra.p_color = Blue) then
@@ -250,6 +251,8 @@ let update_game (game : my_game) : my_game =
               let blue' = Player.grazed blue' in
               handle_grazs red' blue' bullets' t
             else
+              (* remove the bullet from the gui *)
+              let _ = add_update (DeleteBullet(bull.b_id)) in
               let bullets' = Bullet.remove_bullet bull bullets' in
               handle_grazs red' blue' bullets' t
           else

@@ -29,6 +29,7 @@ let victim (team : team_data) : team_data =
   | (lives,bomb,score,power,charge,player) ->
     (*decrease this players lives in the gui*)
     let _ = add_update (SetLives(player.p_color,(lives-1))) in
+    let _ = add_update (SetBombs(player.p_color,cINITIAL_BOMBS)) in
     (lives - 1,cINITIAL_BOMBS,score,power/2,charge,player)
 
 (* updates player who hit enemy with bullet *)
