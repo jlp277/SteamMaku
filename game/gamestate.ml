@@ -33,7 +33,6 @@ let add_bullets (data : game_data) (col : color) (b_type : bullet_type) (new_b :
       let red' = Player.dec_charge red (cost_of_bullet b_type) in
       (* add bullets to the gui *)
       let _ = Gui.gui_add_bullets new_b in
-      let _ = add_update (AddBullet(bubble.b_id,Red,Bubble,bubble.b_pos)) in
       (red',blue,npcs,(new_b@bullets),powerups)
     else if col = Blue & (Player.can_shoot blue Bubble) then
       let blue' = Player.dec_charge blue (cost_of_bullet Bubble) in
