@@ -249,8 +249,6 @@ let check_result (data: game_data) (duration: float) : result =
         match blue with
         | (lives,_,score,_,_,_) -> (score,lives) ) in
       (r_stats,b_stats) in
-  let _ = print_endline(string_of_int(r_lives)) in
-  let _ = print_endline(string_of_int(b_lives)) in
   match (r_lives,b_lives,duration,r_score,b_score) with
   | (0,0,0.,r_score,b_score) -> check_score r_score b_score
   | (0,0,duration,r_score,b_score) -> check_score r_score b_score

@@ -158,6 +158,7 @@ let rec gui_clear_bullets (bullets : bullet list) : unit =
   match bullets with
   | [] -> ()
   | h::t ->
+    let _ = print_endline(string_of_int(h.b_id)) in
     let _ = add_update (DeleteBullet(h.b_id)) in
     gui_clear_bullets t
 

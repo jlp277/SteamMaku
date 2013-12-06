@@ -79,39 +79,39 @@ let handle_time game =
       let blue' = Player.update_pos game.blue_moves blue in
       let red' = Player.add_charge red' in
       let blue' = Player.add_charge blue' in
-      let rec handle_colls red' blue' bullets' lst =
+      let rec handle_colls red' blue' bullet' lst =
         match lst with
-        | [] -> (red',blue',bullets')
+        | [] -> (red',blue',bullet')
         | (hit, bull)::t ->
           if (hit.p_color = Red) then
             if game.red_inv <= 0 then
               let red' = Gamestate.victim red' in
               let blue' = Gamestate.shooter blue' in
               (* remove all bullets from the screen *)
-              let _ = Bullet.gui_clear_bullets bullets' in
-              let bullets' = [] in
+              let _ = Bullet.gui_clear_bullets bullet' in
+              let bullet' = [] in
               let _ = red_inv := cINVINCIBLE_FRAMES in
-              handle_colls red' blue' bullets' t
-            else (*red is invincible delete bullet*)
-              let bullets' = Bullet.remove_bullet bull bullets' in
-              handle_colls red' blue' bullets' t
+              handle_colls red' blue' bullet' t
+            else (*red is invincible delete bullets*)
+              let bullet' = Bullet.remove_bullet bull bullet' in
+              handle_colls red' blue' bullet' t
           else if (hit.p_color = Blue) then
             if game.blue_inv <= 0 then
               let blue' = Gamestate.victim blue' in
               let red' = Gamestate.shooter red' in
               (* remove all bullets from the screen *)
-              let _ = Bullet.gui_clear_bullets bullets' in
-              let bullets' = [] in
+              let _ = Bullet.gui_clear_bullets bullet' in
+              let bullet' = [] in
               let _ = blue_inv := cINVINCIBLE_FRAMES in
-              handle_colls red' blue' bullets' t
+              handle_colls red' blue' bullet' t
             else (*blue is invincible delete bullet*)
-              let bullets' = Bullet.remove_bullet bull bullets' in
-              handle_colls red' blue' bullets' t
+              let bullet' = Bullet.remove_bullet bull bullet' in
+              handle_colls red' blue' bullet' t
           else
             (* let red' = red' in
             let blue' = blue' in
-            let bullets' = bullets' in *)
-            handle_colls red' blue' bullets' t in
+            let bullet' = bullet' in *)
+            handle_colls red' blue' bullet' t in
       let rec handle_grazs red' blue' bullets' lst =
         match lst with
         | [] -> (red',blue',bullets')
