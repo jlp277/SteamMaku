@@ -1,4 +1,4 @@
-(*module Gamestate : Gamestate = struct*)
+(* module Gamestate : Gamestate = struct*)
 
 open Definitions
 open Constants
@@ -153,6 +153,7 @@ let check_result (data: game_data) (duration: float) : result =
     if r_score > b_score then Winner(Red)
     else if b_score > r_score then Winner(Blue)
     else Tie in
+  let check_duration duration : bool = duration <= 0. in
   let ((r_score,r_lives),(b_score,b_lives)) =
     match data with
     | (red,blue,npcs,bullets,power) ->
@@ -163,18 +164,18 @@ let check_result (data: game_data) (duration: float) : result =
         match blue with
         | (lives,_,score,_,_,_) -> (score,lives) ) in
       (r_stats,b_stats) in
-  match (r_lives,b_lives,duration,r_score,b_score) with
-  | (0,0,0.,r_score,b_score) -> check_score r_score b_score
+  match (r_lives,b_lives,duration,r_score,b_score) with(* 
+  | (0,0,0.,r_score,b_score) -> check_score r_score b_score *)
   | (0,0,duration,r_score,b_score) -> check_score r_score b_score
-  | (0,b_lives,0.,r_score,b_score) -> Winner(Blue)
+  (* | (0,b_lives,0.,r_score,b_score) -> Winner(Blue) *)
   | (r_lives,0,0.,r_score,b_score) -> Winner(Red)
-  | (r_lives,b_lives,0.,r_score,b_score) -> check_score r_score b_score
+  (* | (r_lives,b_lives,0.,r_score,b_score) -> check_score r_score b_score *)
   | (r_lives,0,duration,r_score,b_score) -> Winner(Red)
   | (0,b_lives,duration,r_score,b_score) -> Winner(Blue)
-  | (r_lives,b_lives,duration,r_score,b_score) -> Unfinished
+  | (r_lives,b_lives,duration,r_score,b_score) ->
+    if check_duration duration then check_score r_score b_score else Unfinished
 
 let update_game (game : my_game) : my_game =
-  let duration' = game.duration -. cUPDATE_TIME in
   let red_inv : int ref = ref game.red_inv in
   let blue_inv : int ref = ref game.blue_inv in
   let data' =
@@ -251,6 +252,7 @@ let update_game (game : my_game) : my_game =
       (red',blue',npcs,bullets',powerups) in
   let red_moves' = match game.red_moves with | h::t -> t | _ -> [] in
   let blue_moves' = match game.blue_moves with | h::t -> t | _ -> [] in
+  let duration' = game.duration -. cUPDATE_TIME in
   let game' = {
     duration = duration';
     data = data';
