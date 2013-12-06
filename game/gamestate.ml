@@ -4,6 +4,7 @@ open Definitions
 open Constants
 open Util
 open Netgraphics
+include Bullet
 
 type my_game = {
     duration : float;
@@ -211,16 +212,19 @@ let handle_focus game col f_bool =
 let handle_bomb game col =
   let data' = match game.data with
     | (red,blue,npcs,bullets,power) ->
+      let _ = Bullet.gui_clear_bullets bullets in
       if col = Red then
         let red' = (
           match red with
           | (lives,bomb,score,power,charge,player) ->
+            let _ = add_update (SetBombs(Red,(bomb-1))) in
             (lives,bomb - 1,score,power,charge,player) ) in
         (red',blue,npcs,[],power)
       else
         let blue' = (
           match blue with
           | (lives,bomb,score,power,charge,player) ->
+            let _ = add_update (SetBombs(Blue,(bomb-1))) in
             (lives,bomb - 1,score,power,charge,player) ) in
         (red,blue',npcs,[],power) in
   if col = Red then
