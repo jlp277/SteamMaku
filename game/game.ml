@@ -88,7 +88,7 @@ let handle_time game =
               let red' = Gamestate.victim red' in
               let blue' = Gamestate.shooter blue' in
               (* remove all bullets from the screen *)
-              let _ = Bullet.gui_clear_bullets bullets' in
+              let _ = Bullet.gui_clear_bullets bullets in
               let bullets' = [] in
               let _ = red_inv := cINVINCIBLE_FRAMES in
               handle_colls red' blue' bullets' t
