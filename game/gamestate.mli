@@ -27,4 +27,6 @@
 
   val check_result : game_data -> float -> result
 
+  val update_game : my_game -> my_game
+
 (*end*)
