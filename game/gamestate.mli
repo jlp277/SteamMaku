@@ -1,7 +1,5 @@
 (*Modual Interface File for Gamestate*)
 
-(*module type Gamestate = sig*)
-
   open Constants
   open Definitions
 
@@ -28,5 +26,3 @@
   val check_result : game_data -> float -> result
 
   val update_game : my_game -> my_game
-
-(*end*)

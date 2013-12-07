@@ -75,7 +75,8 @@ let handle_time game =
 let handle_action game col act =
   match act with
   | Move (dir_lst) -> Gamestate.handle_move game col dir_lst
-  | Shoot (b_type,target,b_acc) -> Gamestate.handle_shoot game col b_type target b_acc 
+  | Shoot (b_type,target,b_acc) -> 
+    Gamestate.handle_shoot game col b_type target b_acc 
   | Focus (f_bool) -> Gamestate.handle_focus game col f_bool
   | Bomb -> Gamestate.handle_bomb game col
 

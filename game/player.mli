@@ -1,5 +1,4 @@
 (*Module Interface for Team*)
-(* module type Team = sig *)
   open Constants
   open Definitions
 
@@ -20,5 +19,3 @@
   val can_bomb : team_data -> bool
 
   val get_p_pos : game_data -> color -> position
-
-(* end *)

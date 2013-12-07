@@ -1,4 +1,3 @@
-(* module Gamestate : Gamestate = struct*)
 
 open Definitions
 open Constants
@@ -20,13 +19,15 @@ type my_game = {
   }
 
 (* updates player's list of movements *)
-let handle_move (game : my_game) (col : color) (dir_lst : (direction * direction) list) : my_game =
+let handle_move (game : my_game) (col : color) 
+(dir_lst : (direction * direction) list) : my_game =
   if col = Red then
     { game with red_moves = dir_lst }
   else
     { game with blue_moves = dir_lst }
 
-let add_bullets (data : game_data) (col : color) (b_type : bullet_type) (new_b : bullet list) : game_data =
+let add_bullets (data : game_data) (col : color) (b_type : bullet_type) 
+(new_b : bullet list) : game_data =
   match data with
   | (red,blue,npcs,bullets,powerups) ->
     if col = Red & (Player.can_shoot red b_type) then
@@ -65,7 +66,8 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_type = Spread;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = Bullet.calc_vel target' (float_of_int (speed_of_bullet Bubble));
+        b_vel = 
+          Bullet.calc_vel target' (float_of_int (speed_of_bullet Bubble));
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Spread;
         b_color = col } in
@@ -79,7 +81,8 @@ let handle_shoot (game : my_game) col b_type target b_acc =
         b_type = Trail;  
         b_id = next_available_id();
         b_pos = p_pos;
-        b_vel = Bullet.calc_vel target' (float_of_int ((speed_of_bullet Trail)*step));
+        b_vel = 
+          Bullet.calc_vel target' (float_of_int ((speed_of_bullet Trail)*step));
         b_accel = Bullet.calc_acc b_acc;
         b_radius = radius_of_bullet Trail;
         b_color = col } in
@@ -187,7 +190,8 @@ let update_game (game : my_game) : my_game =
       let red' = Player.update_pos game.red_moves red in
       let blue' = Player.update_pos game.blue_moves blue in
       let red' = if not game.red_bomb then Player.add_charge red' else red' in
-      let blue' = if not game.blue_bomb then Player.add_charge blue' else blue' in
+      let blue' = 
+        if not game.blue_bomb then Player.add_charge blue' else blue' in
       let rec handle_colls red' blue' bullet' lst =
         match lst with
         | [] -> (red',blue',bullet')
@@ -240,8 +244,10 @@ let update_game (game : my_game) : my_game =
               handle_grazs red' blue' bullets' t
           else
             handle_grazs red' blue' bullets' t in
-      let (collisions,grazes) = Bullet.check_contacts (red',blue',npcs,bullets',powerups) in
-      let (red',blue',bullets') = handle_colls red' blue' bullets' collisions in
+      let (collisions,grazes) = 
+        Bullet.check_contacts (red',blue',npcs,bullets',powerups) in
+      let (red',blue',bullets') = 
+        handle_colls red' blue' bullets' collisions in
       let (red',blue',bullets') = handle_grazs red' blue' bullets' grazes in
       (red',blue',npcs,bullets',powerups) in
   let red_moves' = match game.red_moves with | h::t -> t | _ -> [] in
@@ -264,4 +270,3 @@ let update_game (game : my_game) : my_game =
       else false
      } in
   game'
-(*end*)

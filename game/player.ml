@@ -1,11 +1,11 @@
-(* module Team : Team = struct *)
 
 open Definitions
 open Constants
 open Util
 open Netgraphics
 
-let update_pos (dir_lst : (direction * direction) list) (team : team_data) : team_data =
+let update_pos (dir_lst : (direction * direction) list) 
+(team : team_data) : team_data =
   match team with
   | (lives,bomb,score,power,charge,player) ->
     let speed = match player.p_focused with
@@ -88,4 +88,3 @@ let get_p_pos data col =
       match blue with
       | (_,_,_,_,_,player) -> player.p_pos )
 
-(* end *)

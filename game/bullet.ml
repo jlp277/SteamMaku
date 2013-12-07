@@ -1,4 +1,3 @@
-(* module Bullet : Bullet = struct *)
 
 open Definitions
 open Constants
@@ -182,5 +181,4 @@ let calc_vel vector speed : velocity =
 (* calculates capped acceleration *)
 let calc_acc acc : acceleration =
   if (magnitude acc) >= cACCEL_LIMIT then (0.,0.) else acc
-
-(* end *)
+  
